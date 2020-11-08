@@ -2,27 +2,41 @@ import os
 import discord
 import random
 from dotenv import load_dotenv
-import json
+import configparser
 
 from discord.ext import commands
 import mysql.connector
 
 
 def connect_to_DB():
-    mydb = mysql.connector.connect(
+    config = configparser.ConfigParser()
+    config.read('env.ini')
+
+    if 'mysql' in config:
+        creds = config['mysql']
+        mydb = mysql.connector.connect(
+            host = creds['host'],
+            database = creds['db'],
+            user = creds['user'],
+            passwd = creds['passwd'],
+            auth_plugin = "mysql_native_password")
+
+        try:
+            if (mydb):
+                status = "connection successful"
+            else:
+                status = "connection failed"
+
+            if status == "connection successful":
+                return mydb
         
-    )
+        except Exception as e:
+            status = "Failure %s" % str(e)
 
-    try:
-        if (mydb):
-            status = "connection successful"
-        else:
-            status = "connection failed"
+    else:
+        print("Failure getting credentials.")
 
-        if status == "connection successful":
-            return mydb
-    except Exception as e:
-        status = "Failure %s" % str(e)
+    
 
 def query_db_no_param(query):
     mydb = connect_to_DB()
@@ -133,10 +147,14 @@ async def roll(ctx, number_of_dice: int, number_of_sides: int):
 # -----------------
 @bot.command(name='app', help = 'Input: full character name    Output: character bio url')
 async def get_character_url(ctx, char_name:str):
+    
     char_query = """SELECT name, species, url FROM characters WHERE name = %(name)s""", {'name': char_name}
 
-    data = query_db(char_query)
-    await ctx.send("character name: " + data[0] + "\n" + "species: " + data[1] + "\n" + "application: " + data[2])
+    try:
+        data = query_db(char_query)
+        await ctx.send("character name: " + data[0] + "\n" + "species: " + data[1] + "\n" + "application: " + data[2])
+    except:
+        print("An error happened in get_character_url using: " + char_name)
 
 # -----------------
 # Get characters in species

@@ -9,11 +9,13 @@ import mysql.connector
 
 
 def connect_to_DB():
+    print("Inside connect_to_DB()")
     config = configparser.ConfigParser()
     config.read('env.ini')
 
     if 'mysql' in config:
         creds = config['mysql']
+        print("Make that connection < connect_to_DB()")
         mydb = mysql.connector.connect(
             host = creds['host'],
             database = creds['db'],
@@ -31,7 +33,8 @@ def connect_to_DB():
                 return mydb
         
         except Exception as e:
-            status = "Failure %s" % str(e)
+            print("Fucked up trying to connect to teh database.")
+            status = "Fucked up trying to connect.  Error:  %s" % str(e)
 
     else:
         print("Failure getting credentials.")
@@ -39,6 +42,7 @@ def connect_to_DB():
     
 
 def query_db_no_param(query):
+    print("In query_db_no_param()")
     mydb = connect_to_DB()
     row = None
     row_list = []
@@ -48,6 +52,7 @@ def query_db_no_param(query):
             connect_to_DB()
         else:
             mydb.ping(True)
+            print("ping mysql connection")
             cursor = mydb.cursor()
             # Changed to put * before query in order to unpack.  Was getting a system error.
             cursor.execute(query)
@@ -63,16 +68,16 @@ def query_db_no_param(query):
         print(e)
 
     finally:
+        print("Finally statement of query_db_no_param()")
         cursor.close()
         mydb.close()
         
         if len(row_list) > 0:
-            for it in row_list:
-                print(it)
+            return row_list
+        else:
+            row_list = ['empty']
             return row_list
 
-        if row is not None:
-            return row
 
 def query_db(query):
     mydb = connect_to_DB()
@@ -173,8 +178,10 @@ async def get_characters_in_species(ctx, species:str):
 # -----------------
 @bot.command(name='species', help = 'Input: None     Output: list of species')
 async def get_species(ctx):
+    print("Generate char_query.")
     char_query = """SELECT distinct species FROM characters"""
 
+    print("Calling query_db_no_param()")
     data_list = query_db_no_param(char_query)
 
     await ctx.send('**Available Species**\n' + '\n'.join(map(str, data_list)))

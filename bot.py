@@ -132,8 +132,7 @@ async def on_ready():
 # -----------------
 @bot.command(name='helpme', help = 'Input: None     Output: help')
 async def show_help(ctx):
-    await ctx.send('Always begin a command with an exclamanation(!).\nList of commands available:\n\n**!species** - Returns a list of all available species. \n**!char_list VAMPIRES** - Shows the active characters of a species (must input a species name)\n**!app "MARTY MCFLY"** - Shows the application url for a desired character (use character\'s name in quotes)\n\nFor more information, visit www.rpconsole.com/bot.html')
-
+    await ctx.send('Always begin a command with an exclamanation(!).\nList of commands available:\n\n**!species** - Returns a list of all available species. \n**!char_list vampires** - Lists active characters of a species (must input a species name)\n**!chars "mysteryuser"** - Lists active characters for a player (use player\'s name in double quotes if multiple words)\n**!app "marty mcfly"** - Shows the application url (and other goodies) for a character (use character\'s name in quotes)\n\nFor more information, visit www.rpconsole.com/bot.html')
 
 # -----------------
 # Roll Dice
@@ -152,12 +151,12 @@ async def roll(ctx, number_of_dice: int, number_of_sides: int):
 # -----------------
 @bot.command(name='app', help = 'Input: full character name    Output: character bio url')
 async def get_character_url(ctx, char_name:str):
-    
-    char_query = """SELECT name, species, url FROM characters WHERE name = %(name)s""", {'name': char_name}
+    proper_character_name = char_name.lower()
+    char_query = """SELECT name, species, player_name, url FROM characters WHERE name = %(name)s""", {'name': proper_character_name}
 
     try:
         data = query_db(char_query)
-        await ctx.send("character name: " + data[0] + "\n" + "species: " + data[1] + "\n" + "application: " + data[2])
+        await ctx.send("character name: " + data[0] + "\n" + "species: " + data[1] + "\n" + "player: " + data[2] + "\n" + "application: " + data[3])
     except:
         print("An error happened in get_character_url using: " + char_name)
 
@@ -166,11 +165,24 @@ async def get_character_url(ctx, char_name:str):
 # -----------------
 @bot.command(name='char_list', help = 'Input: species name    Output: list of characters in species')
 async def get_characters_in_species(ctx, species:str):
-    char_query = """SELECT name FROM characters WHERE species = %(species)s""", {'species': species}
+    proper_species_name = species.lower()
+    char_query = """SELECT name FROM characters WHERE species = %(species)s AND active = 'Y'""", {'species': proper_species_name}
 
     data_list = query_db(char_query)
 
-    await ctx.send('**' + species + '**\n' + '\n'.join(map(str, data_list)))
+    await ctx.send("-------------------\n" + "**" + species + " characters**\n" + "-------------------\n" + "\n".join(map(str, data_list)))
+
+# -----------------
+# Get characters by player
+# -----------------
+@bot.command(name='chars', help = 'Input: player name    Output: list of characters by player')
+async def get_characters_from_player(ctx, player:str):
+    proper_player_name = player.lower()
+    char_query = """SELECT name FROM characters WHERE player_name = %(player)s AND active = 'Y'""", {'player': proper_player_name}
+
+    data_list = query_db(char_query)
+
+    await ctx.send("-------------------\n" + "**" + player + "'s characters**\n" + "-------------------\n" + "\n".join(map(str, data_list)))
 
 
 # -----------------

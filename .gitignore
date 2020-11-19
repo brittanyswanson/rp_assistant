@@ -130,3 +130,4 @@ dmypy.json
 
 # ini files
 *.ini
+.vscode/settings.json

@@ -142,7 +142,7 @@ async def on_ready():
 @bot.command(name='helpme', help='Input: None     Output: help')
 async def show_help(ctx):
     logger.info('!helpme was called.')
-    await ctx.send('Always begin a command with an exclamanation(!).\nList of commands available:\n\n**!species** - Returns a list of all available species. \n**!char_list vampire** - Lists active characters of a species (must input a species name)\n**!chars "mysteryuser"** - Lists active characters for a player (use player\'s name in double quotes if multiple words)\n**!app "marty mcfly"** - Shows the application url (and other goodies) for a character (use character\'s name in quotes)\n\nFor more information, visit www.rpconsole.com/bot.html')
+    await ctx.send('Always begin a command with an exclamanation(!).\nList of commands available:\n\n**!species** - Returns a list of all available species. \n**!char_list vampire** - Lists active characters of a species (must input a species name)\n**!chars "player name"** - Lists active characters for a player (use player\'s name in double quotes if multiple words)\n**!app "marty mcfly"** - Shows the application url (and other goodies) for a character (use character\'s name in quotes)\n**!faceclaim "chris pratt"** - Shows whether a faceclaim is available or not\n\nFor more information, visit www.rpconsole.com/bot.html')
 
 # -----------------
 # Roll Dice
@@ -212,7 +212,7 @@ async def get_characters_from_player(ctx, player: str):
     data_list = query_db(char_query)
 
     if len(data_list) < 1:
-        await ctx.send("This is awkward as hell...I can't find this player.  Are you sure that's there player name?")
+        await ctx.send("This is awkward as hell...I can't find this player.  Are you sure that's thier player name?")
     else:
         await ctx.send("-------------------\n" + "**" + player + "'s characters**\n" + "-------------------\n" + "\n".join(map(str, data_list)))
 

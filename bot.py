@@ -238,8 +238,9 @@ async def get_species(ctx):
 @bot.command(name='faceclaim', help='Input: Face Claim in quotes    Output: Says whether name is in use')
 async def get_faceclaim(ctx, faceclaim):
     logger.info('!faceclaim was called for ' + faceclaim)
+    proper_fc_name = faceclaim.lower()
 
-    fc_query = """SELECT name FROM characters WHERE faceclaim = %s AND active = 'Y'""", (faceclaim,)
+    fc_query = """SELECT name FROM characters WHERE faceclaim = %s AND active = 'Y'""", (proper_fc_name,)
 
     fc_records = query_db(fc_query)
 
@@ -248,6 +249,6 @@ async def get_faceclaim(ctx, faceclaim):
     else:
         fc_status = "available"
 
-    await ctx.send('** ' + faceclaim + ' is ' + fc_status + ' **\n')
+    await ctx.send('** ' + proper_fc_name + ' is ' + fc_status + ' **\n')
 
 bot.run(TOKEN)

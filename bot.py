@@ -212,7 +212,7 @@ async def get_characters_from_player(ctx, player: str):
     data_list = query_db(char_query)
 
     if len(data_list) < 1:
-        await ctx.send("This is awkward as hell...I can't find this player.  Are you sure that's thier player name?")
+        await ctx.send("This is awkward as hell...I can't find this player.  Are you sure that's their player name?")
     else:
         await ctx.send("-------------------\n" + "**" + player + "'s characters**\n" + "-------------------\n" + "\n".join(map(str, data_list)))
 
@@ -249,6 +249,6 @@ async def get_faceclaim(ctx, faceclaim):
     else:
         fc_status = "available"
 
-    await ctx.send('** ' + proper_fc_name + ' is ' + fc_status + ' **\n')
+    await ctx.send(proper_fc_name + ' is **' + fc_status + ' **\n')
 
 bot.run(TOKEN)

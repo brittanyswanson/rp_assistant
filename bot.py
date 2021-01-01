@@ -166,7 +166,7 @@ async def get_character_url(ctx, char_name: str):
     logger.info('!app was called with parameter: ' + char_name)
 
     proper_character_name = char_name.lower()
-    char_query = """SELECT name, species, player_name, url FROM characters WHERE name = %s""", (proper_character_name,)
+    char_query = """SELECT name, species, faceclaim, player_name, url FROM characters WHERE TRIM(name) = %s""", (proper_character_name,)
     logger.debug(char_query)
 
     try:
@@ -175,7 +175,7 @@ async def get_character_url(ctx, char_name: str):
         if len(data) < 1:
             await ctx.send("Hmmm.  I can't find a character with that name.  Maybe try !char_list to see what characters are available by species.")
         else:
-            await ctx.send("character name: " + data[0] + "\n" + "species: " + data[1] + "\n" + "player: " + data[2] + "\n" + "application: " + data[3])
+            await ctx.send("\n-------------------\n**" + data[0] + "**\n\nspecies: " + data[1] + "\nfaceclaim: " + data[2] + "\nplayer: " + data[3] + "\napplication: " + data[4])
     except:
         logger.error("An error happened in get_character_url using: " + char_name)
 
@@ -240,7 +240,7 @@ async def get_faceclaim(ctx, faceclaim):
     logger.info('!faceclaim was called for ' + faceclaim)
     proper_fc_name = faceclaim.lower()
 
-    fc_query = """SELECT name FROM characters WHERE faceclaim = %s AND active = 'Y'""", (proper_fc_name,)
+    fc_query = """SELECT name FROM characters WHERE TRIM(faceclaim) = %s AND active = 'Y'""", (proper_fc_name,)
 
     fc_records = query_db(fc_query)
 

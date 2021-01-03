@@ -156,6 +156,20 @@ async def roll(ctx, number_of_dice: int, number_of_sides: int):
     ]
     await ctx.send(', '.join(dice))
 
+# -----------------
+# Coin Flip
+# -----------------
+@bot.command(name='flip', help='Coin flip.  Heads or tails.')
+async def coin_flip(ctx):
+    logger.info('!flip was called.')
+
+    flip = random.randint(0,1)
+
+    if flip == 0:
+        await ctx.send('Heads')
+    else:
+        await ctx.send('Tails')
+
 
 # -----------------
 # !app "<name>"

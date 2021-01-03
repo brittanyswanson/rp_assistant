@@ -54,6 +54,29 @@ def connect_to_DB():
     else:
         logger.error("Failure reading mysql credentials.")
 
+def insert_db(query, insert_args):
+    mydb = connect_to_DB()
+
+    try:
+        if mydb is None:
+            connect_to_DB()
+        else:
+            mydb.ping(True)
+            cursor = mydb.cursor()
+            cursor.execute(query, insert_args)
+            mydb.commit()
+            logger.info(str(cursor.rowcount) + " records inserted successfully into character table")
+
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        logger.error(str(e))
+        mydb.rollback()
+        logger.error("Failure in insert_database()")
+    
+    finally:
+        cursor.close()
+        mydb.close()
 
 def query_db_no_param(query):
     mydb = connect_to_DB()
@@ -133,8 +156,48 @@ def query_db(query):
 # -----------------------------------------------------------------------------------
 @bot.event
 async def on_ready():
-    logger.info(f'{bot.user.name} has connected to Discord!')
+    logger.info(f'{bot.user.name} has connected to Discord.')
 
+
+@bot.command(name='setup')
+async def setupBot(ctx):
+    guild_id = ctx.message.guild.id             # Get Guild ID
+
+    guild_query = """SELECT name FROM server WHERE discord_guild_id = %s""", (guild_id,)          # Check if guild ID is in database
+    guild_list = query_db(guild_query)
+
+    if len(guild_list) < 1:
+        guild_name = guild_name = ctx.message.guild.name
+        guild_insert = """INSERT INTO server (name, discord_guild_id) VALUES (%s, %s)"""
+        insert_args = (guild_name, guild_id)
+        insert_db(guild_insert,insert_args)
+        logger.info(guild_name + ' ' + str(guild_id) + ' has been added to the database.')
+        await ctx.send("Setup of this server is complete.")
+    else:
+        logger.info(guild_name + ' ' + str(guild_id) + ' already in the database.')
+        await ctx.send("Setup has already been completed.")
+
+@bot.command(name='info')
+async def getInfo(ctx):
+    guild_id = ctx.message.guild.id
+    guild_name = ctx.message.guild.name
+    print('Guild Name: ' + guild_name + '(' + str(guild_id) + ')')
+
+    channel_id = ctx.message.channel.id
+    channel_name = ctx.message.channel.name
+    print('Channel Name: ' + channel_name + '(' + str(channel_id) + ')')
+
+    user_name = ctx.message.author.name
+    user_id = ctx.message.author.id
+    user_display = ctx.message.author.display_name
+    user_nick = ctx.message.author.nick
+    print("User_name: " + user_name)
+    print("User_id: " + str(user_id))
+    print("User_display: " + user_display)
+    if user_nick is not None:
+        print("User_nickname: " + user_nick)
+   
+    await ctx.send(channel_name)
 
 # -----------------
 # Help
@@ -142,6 +205,7 @@ async def on_ready():
 @bot.command(name='helpme', help='Input: None     Output: help')
 async def show_help(ctx):
     logger.info('!helpme was called.')
+    
     await ctx.send('Always begin a command with an exclamanation(!).\nList of commands available:\n\n**!species** - Returns a list of all available species. \n**!char_list vampire** - Lists active characters of a species (must input a species name)\n**!chars "player name"** - Lists active characters for a player (use player\'s name in double quotes if multiple words)\n**!app "marty mcfly"** - Shows the application url (and other goodies) for a character (use character\'s name in quotes)\n**!faceclaim "chris pratt"** - Shows whether a faceclaim is available or not\n\nFor more information, visit www.rpconsole.com/bot.html')
 
 # -----------------
